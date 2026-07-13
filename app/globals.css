@@ -1,0 +1,262 @@
+:root {
+  --ink: #14161c;
+  --ink-blue: #1b2a4a;
+  --ink-blue-deep: #10192e;
+  --paper: #f7f5f0;
+  --paper-dim: #ece8de;
+  --brass: #c9a227;
+  --brass-bright: #e0bb3f;
+  --slate: #5b6472;
+  --error: #b0392b;
+  --radius: 4px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  padding: 0;
+  margin: 0;
+}
+
+body {
+  background: var(--ink-blue-deep);
+  background-image: radial-gradient(circle at 15% 10%, #223559 0%, transparent 45%),
+    radial-gradient(circle at 85% 90%, #223559 0%, transparent 40%);
+  color: var(--ink);
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 32px 16px;
+}
+
+.stage {
+  width: 100%;
+  max-width: 460px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+}
+
+.masthead {
+  text-align: center;
+  color: var(--paper);
+}
+
+.masthead .eyebrow {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 12px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--brass-bright);
+  margin: 0 0 6px;
+}
+
+.masthead h1 {
+  font-family: "Space Grotesk", sans-serif;
+  font-weight: 700;
+  font-size: 26px;
+  margin: 0;
+  line-height: 1.25;
+}
+
+/* --- ticket card, signature element --- */
+.ticket {
+  position: relative;
+  width: 100%;
+  background: var(--paper);
+  border-radius: var(--radius);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.35);
+  overflow: hidden;
+}
+
+.ticket-top {
+  padding: 28px 28px 20px;
+}
+
+.ticket-top .office {
+  font-family: "Space Grotesk", sans-serif;
+  font-weight: 600;
+  font-size: 18px;
+  margin: 0 0 2px;
+  color: var(--ink-blue);
+}
+
+.ticket-top .service {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 12px;
+  color: var(--slate);
+  margin: 0 0 20px;
+  letter-spacing: 0.04em;
+}
+
+.field {
+  margin-bottom: 16px;
+}
+
+.field label {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--slate);
+  margin-bottom: 6px;
+}
+
+.field input {
+  width: 100%;
+  font-family: "Inter", sans-serif;
+  font-size: 15px;
+  padding: 11px 12px;
+  border: 1.5px solid #d8d3c6;
+  border-radius: var(--radius);
+  background: #fff;
+  color: var(--ink);
+  outline: none;
+  transition: border-color 0.15s ease;
+}
+
+.field input:focus {
+  border-color: var(--ink-blue);
+}
+
+.field input::placeholder {
+  color: #b7b2a4;
+}
+
+.submit-btn {
+  width: 100%;
+  padding: 13px 16px;
+  border: none;
+  border-radius: var(--radius);
+  background: var(--ink-blue);
+  color: var(--paper);
+  font-family: "Space Grotesk", sans-serif;
+  font-weight: 600;
+  font-size: 15px;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  transition: background 0.15s ease, transform 0.05s ease;
+}
+
+.submit-btn:hover:not(:disabled) {
+  background: #24365f;
+}
+
+.submit-btn:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+.submit-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.error-msg {
+  font-size: 13px;
+  color: var(--error);
+  margin: -8px 0 16px;
+  font-family: "IBM Plex Mono", monospace;
+}
+
+/* perforation between ticket halves */
+.perforation {
+  position: relative;
+  height: 0;
+  border-top: 2px dashed #cfc9ba;
+  margin: 0 0;
+}
+
+.perforation::before,
+.perforation::after {
+  content: "";
+  position: absolute;
+  top: -11px;
+  width: 22px;
+  height: 22px;
+  background: var(--ink-blue-deep);
+  border-radius: 50%;
+}
+
+.perforation::before {
+  left: -39px;
+}
+
+.perforation::after {
+  right: -39px;
+}
+
+.ticket-stub {
+  padding: 24px 28px 30px;
+  background: var(--paper-dim);
+}
+
+.stub-label {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--slate);
+  margin: 0 0 8px;
+}
+
+.stub-number {
+  font-family: "IBM Plex Mono", monospace;
+  font-weight: 600;
+  font-size: 30px;
+  color: var(--ink-blue);
+  letter-spacing: 0.02em;
+  margin: 0 0 20px;
+  word-break: break-all;
+}
+
+.stub-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px 12px;
+}
+
+.stub-item .k {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--slate);
+  margin: 0 0 4px;
+}
+
+.stub-item .v {
+  font-family: "Space Grotesk", sans-serif;
+  font-weight: 600;
+  font-size: 16px;
+  color: var(--ink);
+  margin: 0;
+}
+
+.new-booking {
+  margin-top: 18px;
+  width: 100%;
+  padding: 11px 16px;
+  border: 1.5px solid var(--ink-blue);
+  border-radius: var(--radius);
+  background: transparent;
+  color: var(--ink-blue);
+  font-family: "Inter", sans-serif;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.footnote {
+  text-align: center;
+  color: rgba(247, 245, 240, 0.55);
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 11px;
+  letter-spacing: 0.04em;
+}
