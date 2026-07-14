@@ -1,20 +1,46 @@
 "use client";
 
 import { useState } from "react";
+import { emailError, phoneError } from "@/lib/validate";
 
 export default function Page() {
   const [form, setForm] = useState({ regNumber: "", phone: "", email: "" });
+  const [fieldErrors, setFieldErrors] = useState({});
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [result, setResult] = useState(null);
 
   function update(field, value) {
     setForm((f) => ({ ...f, [field]: value }));
+    // Clear that field's error as soon as the person starts fixing it.
+    setFieldErrors((fe) => ({ ...fe, [field]: null }));
+  }
+
+  function validateField(field, value) {
+    let msg = null;
+    if (field === "regNumber" && !value.trim()) msg = "Reg number is required.";
+    if (field === "phone") msg = phoneError(value);
+    if (field === "email") msg = emailError(value);
+    setFieldErrors((fe) => ({ ...fe, [field]: msg }));
+    return msg;
+  }
+
+  function validateAll() {
+    const regMsg = form.regNumber.trim() ? null : "Reg number is required.";
+    const phoneMsg = phoneError(form.phone);
+    const emailMsg = emailError(form.email);
+    setFieldErrors({ regNumber: regMsg, phone: phoneMsg, email: emailMsg });
+    return !regMsg && !phoneMsg && !emailMsg;
   }
 
   async function handleSubmit(e) {
     e.preventDefault();
     setError("");
+
+    if (!validateAll()) {
+      return;
+    }
+
     setLoading(true);
     try {
       const res = await fetch("/api/book", {
@@ -37,6 +63,7 @@ export default function Page() {
 
   function resetForm() {
     setForm({ regNumber: "", phone: "", email: "" });
+    setFieldErrors({});
     setResult(null);
     setError("");
   }
@@ -50,7 +77,7 @@ export default function Page() {
 
       <div className="ticket">
         {!result ? (
-          <form className="ticket-top" onSubmit={handleSubmit}>
+          <form className="ticket-top" onSubmit={handleSubmit} noValidate>
             <p className="office">{"Appointment Request"}</p>
             <p className="service">FILL IN YOUR DETAILS BELOW</p>
 
@@ -62,8 +89,9 @@ export default function Page() {
                 placeholder="e.g. 2023/BSC/0142"
                 value={form.regNumber}
                 onChange={(e) => update("regNumber", e.target.value)}
-                required
+                onBlur={(e) => validateField("regNumber", e.target.value)}
               />
+              {fieldErrors.regNumber && <p className="field-error">{fieldErrors.regNumber}</p>}
             </div>
 
             <div className="field">
@@ -74,8 +102,9 @@ export default function Page() {
                 placeholder="e.g. 078 123 4567"
                 value={form.phone}
                 onChange={(e) => update("phone", e.target.value)}
-                required
+                onBlur={(e) => validateField("phone", e.target.value)}
               />
+              {fieldErrors.phone && <p className="field-error">{fieldErrors.phone}</p>}
             </div>
 
             <div className="field">
@@ -86,8 +115,9 @@ export default function Page() {
                 placeholder="e.g. you@mkur.ac.rw"
                 value={form.email}
                 onChange={(e) => update("email", e.target.value)}
-                required
+                onBlur={(e) => validateField("email", e.target.value)}
               />
+              {fieldErrors.email && <p className="field-error">{fieldErrors.email}</p>}
             </div>
 
             {error && <p className="error-msg">{error}</p>}

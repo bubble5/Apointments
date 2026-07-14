@@ -1,9 +1,7 @@
 import { NextResponse } from "next/server";
 import { getConfig, findNextAvailableDate, generateAppointmentNumber } from "@/lib/scheduling";
 import { appendAppointment, getAllAppointments, findDuplicateForDate } from "@/lib/sheets";
-
-const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const PHONE_RE = /^[0-9+()\-\s]{7,20}$/;
+import { emailError, phoneError } from "@/lib/validate";
 
 export async function POST(request) {
   try {
@@ -12,17 +10,16 @@ export async function POST(request) {
     const phone = (body.phone || "").trim();
     const email = (body.email || "").trim();
 
-    if (!regNumber || !phone || !email) {
-      return NextResponse.json(
-        { error: "Reg number, phone, and email are all required." },
-        { status: 400 }
-      );
+    if (!regNumber) {
+      return NextResponse.json({ error: "Reg number is required." }, { status: 400 });
     }
-    if (!EMAIL_RE.test(email)) {
-      return NextResponse.json({ error: "Enter a valid email address." }, { status: 400 });
+    const phoneErr = phoneError(phone);
+    if (phoneErr) {
+      return NextResponse.json({ error: phoneErr }, { status: 400 });
     }
-    if (!PHONE_RE.test(phone)) {
-      return NextResponse.json({ error: "Enter a valid phone number." }, { status: 400 });
+    const emailErr = emailError(email);
+    if (emailErr) {
+      return NextResponse.json({ error: emailErr }, { status: 400 });
     }
 
     const config = getConfig();
