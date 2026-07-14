@@ -15,6 +15,10 @@ Sheet. Confirmation shows an appointment number, date, time, and teller.
   time, and so on). When a day is full it automatically rolls over to the
   next working day (weekends skipped by default).
 - Appointment numbers look like `MKUR-20260713-001`.
+- The same reg number, phone number, or email can only hold **one appointment
+  per day**. Trying to book a second one for the same day returns an error
+  naming the field that conflicted along with the existing appointment's
+  number, time, and teller. Booking a *different* day is always allowed.
 
 ## 1. Set up the Google Sheet
 
