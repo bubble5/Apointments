@@ -22,15 +22,23 @@ Sheet. Confirmation shows an appointment number, date, time, and teller.
    the URL: `https://docs.google.com/spreadsheets/d/THIS_PART/edit`.
 2. In [Google Cloud Console](https://console.cloud.google.com/), create a
    project (or reuse one), enable the **Google Sheets API**, then create a
-   **Service Account**. Generate a JSON key for it.
-3. From the JSON key, you'll need two values:
-   - `client_email` → `GOOGLE_SERVICE_ACCOUNT_EMAIL`
-   - `private_key` → `GOOGLE_PRIVATE_KEY`
-4. Open your Google Sheet, click **Share**, and share it with the service
-   account's email address (the `client_email` value) as an **Editor**.
-5. The app will automatically create a tab named `Appointments` (or whatever
+   **Service Account**. Generate a JSON key for it — this downloads a
+   `.json` file.
+3. Open your Google Sheet, click **Share**, and share it with the service
+   account's email address (the `client_email` value inside the JSON file)
+   as an **Editor**.
+4. The app will automatically create a tab named `Appointments` (or whatever
    you set `GOOGLE_SHEET_NAME` to) and add the header row the first time it
    runs — you don't need to pre-format anything.
+
+**Credentials**: paste the *entire contents* of the downloaded `.json` file
+as one env var, `GOOGLE_SERVICE_ACCOUNT_JSON`. This is the recommended
+method — since it's already valid JSON, there's no risk of mangling the
+private key's `\n` escape sequences by hand. See `.env.example` for the
+exact format. (The old two-variable method,
+`GOOGLE_SERVICE_ACCOUNT_EMAIL` + `GOOGLE_PRIVATE_KEY`, still works as a
+fallback if you already have those set somewhere, but isn't necessary for
+new setups.)
 
 ## 2. Configure environment variables
 

@@ -1,26 +1,5 @@
-node_modules/
-.next/
-dist/
-build/
-
-# Environment
+node_modules
+.next
 .env
 .env.local
-
-# macOS
-.DS_Store
-
-# Editor
-.vscode/
-.idea/
-
-# Python
-__pycache__/
-*.pyc
-
-# Vercel
 .vercel
-
-# Logs
-npm-debug.log
-yarn-error.log
