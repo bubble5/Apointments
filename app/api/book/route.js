@@ -1,7 +1,16 @@
 import { NextResponse } from "next/server";
-import { getConfig, findNextAvailableDate, generateAppointmentNumber } from "@/lib/scheduling";
+import {
+  getConfig,
+  listTimeSlots,
+  assignTellerForSlot,
+  generateAppointmentNumber,
+  dateKey,
+  isBusinessDay,
+} from "@/lib/scheduling";
 import { appendAppointment, getAllAppointments, findDuplicateForDate } from "@/lib/sheets";
 import { emailError, phoneError } from "@/lib/validate";
+
+const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
 
 export async function POST(request) {
   try {
@@ -9,6 +18,8 @@ export async function POST(request) {
     const regNumber = (body.regNumber || "").trim();
     const phone = (body.phone || "").trim();
     const email = (body.email || "").trim();
+    const date = (body.date || "").trim();
+    const time = (body.time || "").trim();
 
     if (!regNumber) {
       return NextResponse.json({ error: "Reg number is required." }, { status: 400 });
@@ -24,16 +35,33 @@ export async function POST(request) {
 
     const config = getConfig();
 
-    // Fetch the sheet once and reuse it both for finding the next open slot
-    // (which may need to check several candidate days) and for the same-day
-    // duplicate check below — avoids hammering the Sheets API repeatedly.
+    if (!DATE_RE.test(date)) {
+      return NextResponse.json({ error: "Select a valid date." }, { status: 400 });
+    }
+    const todayKey = dateKey(new Date());
+    if (date < todayKey) {
+      return NextResponse.json(
+        { error: "That date has already passed. Please pick an upcoming date." },
+        { status: 400 }
+      );
+    }
+    // Parse the date safely as local time (avoids UTC off-by-one issues).
+    const [y, m, d] = date.split("-").map(Number);
+    if (!isBusinessDay(config, new Date(y, m - 1, d))) {
+      return NextResponse.json(
+        { error: "That date isn't available for booking (weekend or closed)." },
+        { status: 400 }
+      );
+    }
+    if (!listTimeSlots(config).includes(time)) {
+      return NextResponse.json({ error: "Select a valid time slot." }, { status: 400 });
+    }
+
+    // Fetch the sheet once and reuse it for the duplicate check and the
+    // slot-availability check below — avoids hammering the Sheets API.
     const allAppointments = await getAllAppointments();
-    const countForDateFn = async (dateKeyStr) =>
-      allAppointments.filter((a) => a.date === dateKeyStr).length;
 
-    const slot = await findNextAvailableDate(config, countForDateFn);
-
-    const duplicate = findDuplicateForDate(allAppointments, slot.dateKey, {
+    const duplicate = findDuplicateForDate(allAppointments, date, {
       regNumber,
       phone,
       email,
@@ -55,8 +83,20 @@ export async function POST(request) {
       );
     }
 
-    // Sequence number for the day = how many appointments existed before this one + 1
-    const appointmentNumber = generateAppointmentNumber(slot.dateKey, slot.count + 1);
+    const bookedTellersAtSlot = allAppointments
+      .filter((a) => a.date === date && a.time === time)
+      .map((a) => a.teller);
+    const teller = assignTellerForSlot(config, bookedTellersAtSlot);
+
+    if (!teller) {
+      return NextResponse.json(
+        { error: "That slot was just taken by someone else. Please pick another time." },
+        { status: 409 }
+      );
+    }
+
+    const countForDay = allAppointments.filter((a) => a.date === date).length;
+    const appointmentNumber = generateAppointmentNumber(date, countForDay + 1);
 
     const row = {
       timestamp: new Date().toISOString(),
@@ -64,18 +104,18 @@ export async function POST(request) {
       regNumber,
       phone,
       email,
-      date: slot.dateKey,
-      time: slot.time,
-      teller: slot.teller,
+      date,
+      time,
+      teller,
     };
 
     await appendAppointment(row);
 
     return NextResponse.json({
       appointmentNumber,
-      date: slot.dateKey,
-      time: slot.time,
-      teller: slot.teller,
+      date,
+      time,
+      teller,
       orgName: config.orgName,
     });
   } catch (err) {
@@ -86,3 +126,4 @@ export async function POST(request) {
     );
   }
 }
+

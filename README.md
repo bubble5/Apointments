@@ -1,19 +1,24 @@
 # ID Pickup Appointments
 
-A small Next.js app for booking ID-pickup appointments. Students enter their
-reg number, phone, and email; the app assigns the next available slot across
-2–3 tellers (5-minute slots by default) and writes the booking to a Google
-Sheet. Confirmation shows an appointment number, date, time, and teller.
+A small Next.js app for booking ID-pickup appointments. Students pick an open
+date and time slot from a live availability grid, then enter their reg
+number, phone, and email. The booking (with an assigned teller) is written
+to a Google Sheet, and the confirmation shows an appointment number, date,
+time, and teller.
 
 ## How scheduling works
 
 - Business hours, number of tellers, teller names, and slot length are all
   configured via environment variables (see `.env.example`).
-- Appointments are handed out in order: the app counts how many bookings
-  already exist for a day, then fills tellers "in parallel" (slot 1 goes to
-  Teller 1/2/3 at the same time, slot 2 goes to Teller 1/2/3 at the next
-  time, and so on). When a day is full it automatically rolls over to the
-  next working day (weekends skipped by default).
+- The booking page shows the next 14 bookable days (weekends skipped by
+  default) with how many total slots remain each day. Picking a day loads
+  that day's time grid, showing each time's remaining capacity out of the
+  number of tellers (e.g. "2 of 3 open"); full days and full times are
+  disabled.
+- When the person submits, the server re-checks that exact date+time is
+  still open (in case someone else just took it) and assigns whichever
+  teller is free at that slot — so two people can hold the same time as
+  long as a teller is free, without ever double-booking the same teller.
 - Appointment numbers look like `MKUR-20260713-001`.
 - The same reg number, phone number, or email can only hold **one appointment
   per day**. Trying to book a second one for the same day returns an error
@@ -90,8 +95,17 @@ Visit http://localhost:3000.
 
 ## API routes
 
-- `POST /api/book` — body `{ regNumber, phone, email }`, returns
-  `{ appointmentNumber, date, time, teller }`.
+- `GET /api/availability?days=14` — returns the next N bookable days with
+  remaining total capacity each: `{ days: [{ date, remaining, total, full,
+  isToday }] }`.
+- `GET /api/availability?date=2026-07-20` — returns that day's time slots
+  with remaining capacity per slot: `{ date, slots: [{ time, remaining,
+  total, full }] }`.
+- `POST /api/book` — body `{ regNumber, phone, email, date, time }` (date
+  and time must be one of the open slots from `/api/availability`), returns
+  `{ appointmentNumber, date, time, teller }`. Rejects with 409 if that exact
+  slot was taken by someone else between loading availability and
+  submitting.
 - `GET /api/lookup?appointmentNumber=MKUR-20260713-001` — returns the stored
   appointment if you want to build a "check my appointment" page later.
 

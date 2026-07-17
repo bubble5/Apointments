@@ -137,6 +137,109 @@ body {
   margin: 6px 0 0;
 }
 
+.loading-note {
+  font-size: 13px;
+  color: var(--slate);
+  font-family: "IBM Plex Mono", monospace;
+  margin: 4px 0 0;
+}
+
+.day-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.day-chip {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  padding: 10px 6px;
+  border: 1.5px solid #d8d3c6;
+  border-radius: var(--radius);
+  background: #fff;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.day-chip:hover:not(.disabled) {
+  border-color: var(--ink-blue);
+}
+
+.day-chip.selected {
+  border-color: var(--ink-blue);
+  background: var(--ink-blue);
+}
+
+.day-chip.selected .day-chip-label,
+.day-chip.selected .day-chip-sub {
+  color: var(--paper);
+}
+
+.day-chip.disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.day-chip-label {
+  font-family: "Space Grotesk", sans-serif;
+  font-weight: 600;
+  font-size: 13px;
+  color: var(--ink);
+}
+
+.day-chip-sub {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 10px;
+  letter-spacing: 0.04em;
+  color: var(--slate);
+}
+
+.time-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+}
+
+.time-chip {
+  padding: 9px 4px;
+  border: 1.5px solid #d8d3c6;
+  border-radius: var(--radius);
+  background: #fff;
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ink);
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.time-chip:hover:not(.disabled) {
+  border-color: var(--ink-blue);
+}
+
+.time-chip.selected {
+  border-color: var(--ink-blue);
+  background: var(--ink-blue);
+  color: var(--paper);
+}
+
+.time-chip.disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  text-decoration: line-through;
+}
+
+.selection-summary {
+  font-size: 13px;
+  color: var(--ink-blue);
+  background: var(--paper-dim);
+  border-radius: var(--radius);
+  padding: 10px 12px;
+  margin: 4px 0 18px;
+}
+
 .submit-btn {
   width: 100%;
   padding: 13px 16px;
