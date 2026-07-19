@@ -9,12 +9,15 @@ time, and teller.
 ## How scheduling works
 
 - Business hours, number of tellers, teller names, and slot length are all
-  configured via environment variables (see `.env.example`).
-- The booking page shows the next 14 bookable days (weekends skipped by
-  default) with how many total slots remain each day. Picking a day loads
-  that day's time grid, showing each time's remaining capacity out of the
-  number of tellers (e.g. "2 of 3 open"); full days and full times are
-  disabled.
+  configured via environment variables (see `.env.example`). Weekdays and
+  weekends can have different hours — by default weekends are open 9am-1pm
+  while weekdays run 8am-5pm; set `ENABLE_WEEKENDS=false` to close weekends
+  entirely instead.
+- The booking page shows the next 14 bookable days with how many total slots
+  remain each day. Picking a day loads that day's time grid — using that
+  day's actual hours, so Saturday shows fewer slots than a weekday — showing
+  each time's remaining capacity out of the number of tellers (e.g. "2 of 3
+  open"); full days and full times are disabled.
 - When the person submits, the server re-checks that exact date+time is
   still open (in case someone else just took it) and assigns whichever
   teller is free at that slot — so two people can hold the same time as
@@ -54,8 +57,7 @@ new setups.)
 Copy `.env.example` to `.env.local` for local development and fill in:
 
 ```
-GOOGLE_SERVICE_ACCOUNT_EMAIL=...
-GOOGLE_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----\n"
+GOOGLE_SERVICE_ACCOUNT_JSON='{"type":"service_account", ... }'
 GOOGLE_SHEET_ID=...
 GOOGLE_SHEET_NAME=Appointments
 
@@ -64,7 +66,9 @@ TELLER_NAMES=Teller 1,Teller 2,Teller 3
 SLOT_MINUTES=5
 BUSINESS_START=08:00
 BUSINESS_END=17:00
-SKIP_WEEKENDS=true
+ENABLE_WEEKENDS=true
+WEEKEND_START=09:00
+WEEKEND_END=13:00
 ORG_NAME=Mount Kigali University Rwanda
 ```
 

@@ -5,6 +5,7 @@ import {
   assignTellerForSlot,
   generateAppointmentNumber,
   dateKey,
+  parseDateKey,
   isBusinessDay,
 } from "@/lib/scheduling";
 import { appendAppointment, getAllAppointments, findDuplicateForDate } from "@/lib/sheets";
@@ -45,15 +46,14 @@ export async function POST(request) {
         { status: 400 }
       );
     }
-    // Parse the date safely as local time (avoids UTC off-by-one issues).
-    const [y, m, d] = date.split("-").map(Number);
-    if (!isBusinessDay(config, new Date(y, m - 1, d))) {
+    const dateObj = parseDateKey(date);
+    if (!isBusinessDay(config, dateObj)) {
       return NextResponse.json(
         { error: "That date isn't available for booking (weekend or closed)." },
         { status: 400 }
       );
     }
-    if (!listTimeSlots(config).includes(time)) {
+    if (!listTimeSlots(config, dateObj).includes(time)) {
       return NextResponse.json({ error: "Select a valid time slot." }, { status: 400 });
     }
 

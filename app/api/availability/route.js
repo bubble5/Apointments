@@ -2,9 +2,10 @@ import { NextResponse } from "next/server";
 import {
   getConfig,
   listUpcomingBusinessDates,
-  dailyCapacity,
+  dailyCapacityForDate,
   getDayAvailability,
   dateKey,
+  parseDateKey,
 } from "@/lib/scheduling";
 import { getAllAppointments } from "@/lib/sheets";
 
@@ -27,16 +28,16 @@ export async function GET(request) {
       const bookedForDate = allAppointments
         .filter((a) => a.date === dateParam)
         .map((a) => ({ time: a.time, teller: a.teller }));
-      const slots = getDayAvailability(config, bookedForDate);
+      const slots = getDayAvailability(config, parseDateKey(dateParam), bookedForDate);
       return NextResponse.json({ date: dateParam, slots });
     }
 
     // Day-level availability for the next N bookable days.
     const upcoming = listUpcomingBusinessDates(config, Math.min(daysParam, 60));
-    const capacity = dailyCapacity(config);
     const todayKey = dateKey(new Date());
 
     const days = upcoming.map((d) => {
+      const capacity = dailyCapacityForDate(config, parseDateKey(d));
       const count = allAppointments.filter((a) => a.date === d).length;
       const remaining = Math.max(0, capacity - count);
       return {
