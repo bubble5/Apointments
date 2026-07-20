@@ -4,7 +4,8 @@ import {
   listUpcomingBusinessDates,
   dailyCapacityForDate,
   getDayAvailability,
-  dateKey,
+  getTodayKey,
+  isPastSlot,
   parseDateKey,
 } from "@/lib/scheduling";
 import { getAllAppointments } from "@/lib/sheets";
@@ -28,13 +29,18 @@ export async function GET(request) {
       const bookedForDate = allAppointments
         .filter((a) => a.date === dateParam)
         .map((a) => ({ time: a.time, teller: a.teller }));
-      const slots = getDayAvailability(config, parseDateKey(dateParam), bookedForDate);
+      const slots = getDayAvailability(config, parseDateKey(dateParam), bookedForDate).map(
+        (s) =>
+          isPastSlot(config, dateParam, s.time)
+            ? { ...s, remaining: 0, full: true, past: true }
+            : s
+      );
       return NextResponse.json({ date: dateParam, slots });
     }
 
     // Day-level availability for the next N bookable days.
     const upcoming = listUpcomingBusinessDates(config, Math.min(daysParam, 60));
-    const todayKey = dateKey(new Date());
+    const todayKey = getTodayKey(config);
 
     const days = upcoming.map((d) => {
       const capacity = dailyCapacityForDate(config, parseDateKey(d));

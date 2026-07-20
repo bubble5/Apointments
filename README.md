@@ -18,6 +18,12 @@ time, and teller.
   day's actual hours, so Saturday shows fewer slots than a weekday — showing
   each time's remaining capacity out of the number of tellers (e.g. "2 of 3
   open"); full days and full times are disabled.
+- For today's date, any time slot that has already passed is automatically
+  shown as full/disabled, and the server independently rejects a booking for
+  a past time even if it somehow got submitted. "Now" is computed in
+  `ORG_TIMEZONE` (default `Africa/Kigali`), not the server's raw clock —
+  important because Vercel's servers run in UTC, so without this, "today"
+  and "past" could be miscalculated by up to ~2 hours around midnight.
 - When the person submits, the server re-checks that exact date+time is
   still open (in case someone else just took it) and assigns whichever
   teller is free at that slot — so two people can hold the same time as
@@ -70,6 +76,7 @@ ENABLE_WEEKENDS=true
 WEEKEND_START=09:00
 WEEKEND_END=13:00
 ORG_NAME=Mount Kigali University Rwanda
+ORG_TIMEZONE=Africa/Kigali
 ```
 
 Notes:

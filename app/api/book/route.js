@@ -4,7 +4,8 @@ import {
   listTimeSlots,
   assignTellerForSlot,
   generateAppointmentNumber,
-  dateKey,
+  getTodayKey,
+  isPastSlot,
   parseDateKey,
   isBusinessDay,
 } from "@/lib/scheduling";
@@ -39,7 +40,7 @@ export async function POST(request) {
     if (!DATE_RE.test(date)) {
       return NextResponse.json({ error: "Select a valid date." }, { status: 400 });
     }
-    const todayKey = dateKey(new Date());
+    const todayKey = getTodayKey(config);
     if (date < todayKey) {
       return NextResponse.json(
         { error: "That date has already passed. Please pick an upcoming date." },
@@ -55,6 +56,12 @@ export async function POST(request) {
     }
     if (!listTimeSlots(config, dateObj).includes(time)) {
       return NextResponse.json({ error: "Select a valid time slot." }, { status: 400 });
+    }
+    if (isPastSlot(config, date, time)) {
+      return NextResponse.json(
+        { error: "That time has already passed today. Please pick a later time." },
+        { status: 400 }
+      );
     }
 
     // Fetch the sheet once and reuse it for the duplicate check and the
